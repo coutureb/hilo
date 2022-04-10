@@ -63,10 +63,15 @@ class UtilityManager:
         if self.new_entities == 0:
             LOG.debug("No new entities, not setting up again")
             return
-        config = {}
-        config[UTILITY_DOMAIN] = OrderedDict(
-            {**self.hass.data.get("utility_meter_data", {}), **self.meter_configs}
-        )
+        config = {
+            UTILITY_DOMAIN: OrderedDict(
+                {
+                    **self.hass.data.get("utility_meter_data", {}),
+                    **self.meter_configs,
+                }
+            )
+        }
+
         await utility_setup(self.hass, config)
         await utility_setup_platform(
             self.hass, config, async_add_entities, self.meter_entities
