@@ -91,15 +91,14 @@ def validate_tariff_list(tariff_config):
 def generate_entities_from_device(device, hilo, scan_interval):
     entities = []
     if device.type == "Gateway":
-        entities.append(
-            HiloChallengeSensor(hilo, device, scan_interval),
+        entities.extend(
+            (
+                HiloChallengeSensor(hilo, device, scan_interval),
+                HiloRewardSensor(hilo, device, scan_interval),
+                HiloNotificationSensor(hilo, device, scan_interval),
+            )
         )
-        entities.append(
-            HiloRewardSensor(hilo, device, scan_interval),
-        )
-        entities.append(
-            HiloNotificationSensor(hilo, device, scan_interval),
-        )
+
     if device.has_attribute("current_temperature"):
         entities.append(TemperatureSensor(hilo, device))
     if device.has_attribute("co2"):
@@ -234,9 +233,7 @@ class Co2Sensor(HiloEntity, SensorEntity):
 
     @property
     def icon(self):
-        if not self._device.available:
-            return "mdi:lan-disconnect"
-        return "mdi:molecule-co2"
+        return "mdi:molecule-co2" if self._device.available else "mdi:lan-disconnect"
 
 
 class EnergySensor(IntegrationSensor):
@@ -497,9 +494,7 @@ class HiloRewardSensor(HiloEntity, RestoreEntity, SensorEntity):
 
     @property
     def icon(self):
-        if not self._device.available:
-            return "mdi:lan-disconnect"
-        return "mdi:cash-plus"
+        return "mdi:cash-plus" if self._device.available else "mdi:lan-disconnect"
 
     @property
     def should_poll(self):

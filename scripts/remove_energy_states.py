@@ -27,6 +27,7 @@ Make sure that Home Assistant is stopped before running the script
 
 """
 
+
 from datetime import datetime
 import json
 from os import access, W_OK, R_OK
@@ -54,12 +55,7 @@ with open(state_file, "r") as f:
     states = json.loads(f.read())
 
 data = states.get("data")
-new_states = []
-
-for k in data:
-    if "hilo_energy" in k['state']['entity_id']:
-        continue
-    new_states.append(k)
+new_states = [k for k in data if "hilo_energy" not in k['state']['entity_id']]
 
 states["data"] = new_states
 with open(state_file, "w") as f:

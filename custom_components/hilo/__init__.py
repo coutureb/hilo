@@ -242,8 +242,7 @@ class Hilo:
         """Define a callback for receiving a websocket event."""
         async_dispatcher_send(self._hass, DISPATCHER_TOPIC_WEBSOCKET_EVENT, event)
         if event.event_type == "COMPLETE":
-            cb = self.invocations.get(event.invocation)
-            if cb:
+            if cb := self.invocations.get(event.invocation):
                 async_call_later(self._hass, 3, cb(event.invocation))
         elif event.target == "Heartbeat":
             self.validate_heartbeat(event)
@@ -426,10 +425,10 @@ class Hilo:
 
     @property
     def high_times(self):
-        for period, data in CONF_HIGH_PERIODS.items():
-            if data["from"] <= datetime.now().time() <= data["to"]:
-                return True
-        return False
+        return any(
+            data["from"] <= datetime.now().time() <= data["to"]
+            for period, data in CONF_HIGH_PERIODS.items()
+        )
 
     def check_tarif(self):
         tarif = "low"
@@ -518,7 +517,7 @@ class Hilo:
             .get(ATTR_UNIT_OF_MEASUREMENT),
             ATTR_DEVICE_CLASS: DEVICE_CLASS_ENERGY,
         }
-        if not all(a in attrs.keys() for a in new_attrs.keys()):
+        if any(a not in attrs.keys() for a in new_attrs):
             LOG.warning(
                 f"Fixing utility sensor: {entity} {current_state} new_attrs: {new_attrs}"
             )
@@ -577,7 +576,7 @@ class HiloEntity(CoordinatorEntity):
 
     @property
     def should_poll(self) -> bool:
-        return False if self._device.type != "Gateway" else True
+        return self._device.type == "Gateway"
 
     @property
     def available(self) -> bool:

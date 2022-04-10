@@ -56,8 +56,7 @@ class HiloLight(HiloEntity, LightEntity):
     @property
     def supported_color_modes(self) -> set:
         """Flag supported modes."""
-        supports = set()
-        supports.add("onoff")
+        supports = {"onoff"}
         if self._device.has_attribute("intensity"):
             supports.add("brightness")
         return supports
